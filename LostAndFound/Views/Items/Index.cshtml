@@ -1,0 +1,55 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@model IReadOnlyList<Item>
+
+@{
+    ViewData["Title"] = "Обяви";
+}
+
+<h1>Обяви</h1>
+
+@if (TempData["ItemCreated"] is string message)
+{
+    <div class="alert alert-success" role="status">@message</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Нова обява</a>
+</p>
+
+@if (Model.Count == 0)
+{
+    <p>Все още няма публикувани обяви.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Заглавие</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Категория</th>
+                    <th scope="col">Място</th>
+                    <th scope="col">Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
+                        </td>
+                        <td>@(item.Type == ItemType.Lost ? "Изгубена" : "Намерена")</td>
+                        <td>@item.Category.Name</td>
+                        <td>@item.Location</td>
+                        <td>@item.OccurredOn.ToString("dd.MM.yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
