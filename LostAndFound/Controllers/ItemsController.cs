@@ -121,7 +121,34 @@ namespace LostAndFound.Controllers
                 return NotFound();
             }
 
-            return View(item);
+            var oppositeType = item.Type == ItemType.Lost
+                ? ItemType.Found
+                : ItemType.Lost;
+            var earliesDate = item.OccurredOn.AddDays(-30);
+            var latestDate = item.OccurredOn.AddDays(30);
+
+            var candidates = await _context.Items
+                .AsNoTracking()
+                .Include(candidate => candidate.Category)
+                .Where(candidate =>
+                candidate.Id != item.Id
+                && candidate.Type == oppositeType
+                && candidate.CategoryId == item.CategoryId
+                && candidate.OccurredOn >= earliesDate
+                && candidate.OccurredOn <= latestDate)
+                .ToListAsync();
+
+            var potentialMatches = candidates
+                .OrderBy(candidates =>
+                Math.Abs(candidates.OccurredOn.DayNumber - item.OccurredOn.DayNumber))
+                .Take(5)
+                .ToArray();
+
+            return View(new ItemDetailsViewModel
+            {
+                Item = item,
+                PotentialMatches = potentialMatches
+            });
         }
 
         [HttpGet]
