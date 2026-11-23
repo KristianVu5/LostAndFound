@@ -28,4 +28,6 @@
 <h2>Описание</h2>
 <p>@Model.Description</p>
 
-<a asp-action="Index">Към обявите</a>
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактирай</a>
+<a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Изтрий</a>
+<a asp-action="Index" class="btn btn-link">Към обявите</a>
