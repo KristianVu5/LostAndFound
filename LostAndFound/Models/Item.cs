@@ -14,6 +14,7 @@ namespace LostAndFound.Models
         public DateOnly OccurredOn { get; set; }
         public ItemType Type { get; set; }
         public int CategoryId { get; set; }
+        public string? CreatedById { get; set; }
         public Category Category { get; set; } = null!;
     }
 }

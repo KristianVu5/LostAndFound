@@ -1,0 +1,30 @@
+@using LostAndFound.Data
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item d-flex align-items-center gap-3">
+            <span class="navbar-text">@User.Identity?.Name</span>
+            <form asp-area="Identity" asp-page="/Account/Logout"
+                  asp-route-returnUrl="@Url.Content("~/")" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                    Изход
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark"
+               asp-area="Identity" asp-page="/Account/Register">Регистрация</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark"
+               asp-area="Identity" asp-page="/Account/Login">Вход</a>
+        </li>
+    }
+</ul>
+

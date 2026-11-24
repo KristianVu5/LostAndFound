@@ -7,6 +7,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata.Ecma335;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace LostAndFound.Controllers
 {
@@ -147,10 +149,12 @@ namespace LostAndFound.Controllers
             return View(new ItemDetailsViewModel
             {
                 Item = item,
-                PotentialMatches = potentialMatches
+                PotentialMatches = potentialMatches,
+                CanManage = User.Identity?.IsAuthenticated == true && CanManageItem(item)
             });
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -158,12 +162,19 @@ namespace LostAndFound.Controllers
             return View(new ItemForm());
         }
 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ItemForm form)
         {
             if (ModelState.IsValid)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (userId is null)
+                {
+                    return Challenge();
+                }
                 var item = new Item
                 {
                     Title = form.Title.Trim(),
@@ -171,7 +182,8 @@ namespace LostAndFound.Controllers
                     Location = form.Location.Trim(),
                     OccurredOn = form.OccurredOn!.Value,
                     Type = form.Type!.Value,
-                    CategoryId = form.CategoryId!.Value
+                    CategoryId = form.CategoryId!.Value,
+                    CreatedById = userId
                 };
 
                 _context.Items.Add(item);
@@ -194,13 +206,20 @@ namespace LostAndFound.Controllers
             return View(form);
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             var item = await _context.Items.FindAsync(id);
+
             if (item is null)
             {
                 return NotFound();
+            }
+
+            if (!CanManageItem(item))
+            {
+                return Forbid();
             }
 
             ViewData["ItemId"] = id;
@@ -216,14 +235,21 @@ namespace LostAndFound.Controllers
             });
         }
 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromRoute] int id, ItemForm form)
         {
             var item = await _context.Items.FindAsync(id);
+
             if (item is null)
             {
                 return NotFound();
+            }
+
+            if (!CanManageItem(item))
+            {
+                return Forbid();
             }
 
             if (ModelState.IsValid)
@@ -257,6 +283,7 @@ namespace LostAndFound.Controllers
             return View(form);
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -267,19 +294,39 @@ namespace LostAndFound.Controllers
                 return NotFound();
             }
 
+            if (!CanManageItem(item))
+            {
+                return Forbid();
+            }
+
             return View(item);
         }
 
+        [Authorize]
         [HttpPost]
         [ActionName(nameof(Delete))]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed([FromRoute] int id)
         {
-            var deletedCoutn = await _context.Items
-                .Where(item => item.Id == id)
-                .ExecuteDeleteAsync();
+            var item = await _context.Items.FindAsync(id);
 
-            if(deletedCoutn == 0)
+            if (item is null)
+            {
+                return NotFound();
+            }
+
+            if (!CanManageItem(item))
+            {
+                return Forbid();
+            }
+
+            _context.Items.Remove(item);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
             {
                 return NotFound();
             }
@@ -288,8 +335,12 @@ namespace LostAndFound.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        
 
+        private bool CanManageItem(Item item)
+        {
+            return User.IsInRole("Admin")
+                || item.CreatedById == User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
         private async Task LoadCategoriesAsync(int? selectedCategoryId = null)
         {
             var categories = await _context.Categories

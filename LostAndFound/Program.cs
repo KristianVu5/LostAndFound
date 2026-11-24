@@ -1,5 +1,6 @@
 using LostAndFound.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Missing connection string: DefaultConnection.");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+     options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -24,6 +30,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -33,5 +40,31 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapRazorPages();
 
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roleNames = ["User", "Admin"];
+
+    foreach (var roleName in roleNames)
+    {
+        if(await roleManager.RoleExistsAsync(roleName))
+        {
+            continue;
+        }
+
+        var result = await roleManager.CreateAsync(new IdentityRole(roleName));
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(error => error.Description));
+
+            throw new InvalidOperationException(
+                $"Ролята '{roleName}' не може дда бъде създадена: {errors}");
+        }
+    }
+}
 app.Run();

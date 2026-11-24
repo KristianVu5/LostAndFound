@@ -28,8 +28,11 @@
 <h2>Описание</h2>
 <p>@item.Description</p>
 
-<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Редактирай</a>
-<a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Изтрий</a>
+@if (Model.CanManage)
+{
+    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Редактирай</a>
+    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Изтрий</a>
+}
 <a asp-action="Index" class="btn btn-link">Към обявите</a>
 
 <h2>Възможни съвпадения</h2>
@@ -52,3 +55,4 @@ else
         }
     </ul>
 }
+
