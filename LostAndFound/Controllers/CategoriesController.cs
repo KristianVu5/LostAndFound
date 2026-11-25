@@ -2,11 +2,13 @@
 using LostAndFound.ViewModels;
 using LostAndFound.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 
 namespace LostAndFound.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
 

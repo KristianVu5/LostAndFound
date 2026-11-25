@@ -12,7 +12,7 @@
 <h1>Нова обява</h1>
 
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" enctype="multipart/form-data">
     <partial name="_ItemFormFields" model="Model" />
 
     <button type="submit" class="btn btn-primary">Публикувай</button>

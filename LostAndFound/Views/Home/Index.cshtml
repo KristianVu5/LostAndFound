@@ -1,8 +1,80 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Начало";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Изгубени и намерени вещи</h1>
-    <p>Тук можеш да публикуваш обява за изгубена или намерена вещ.</p>
+<div class="home-page">
+    <section class="home-hero" aria-labelledby="home-title">
+        <div class="home-hero-copy">
+            <span class="home-eyebrow">Платформа за изгубени и намерени вещи</span>
+            <h1 id="home-title">Нека всяка вещ намери пътя обратно.</h1>
+            <p class="home-lead">
+                Публикувай обява за изгубена или намерена вещ и помогни на хората да се открият.
+                Търси по място, категория и дата, а системата ще ти покаже възможни съвпадения.
+            </p>
+
+            <div class="home-actions">
+                <a asp-controller="Items" asp-action="Index" class="btn home-button-primary">
+                    Разгледай обявите
+                </a>
+                <a asp-controller="Items" asp-action="Create" class="btn home-button-secondary">
+                    Публикувай обява
+                </a>
+            </div>
+
+            <p class="home-note">Няколко стъпки могат да помогнат на една вещ да се върне при своя собственик.</p>
+        </div>
+
+        <div class="home-hero-art" aria-hidden="true">
+            <div class="hero-orbit orbit-one"></div>
+            <div class="hero-orbit orbit-two"></div>
+            <div class="hero-card">
+                <div class="hero-card-icon">
+                    <svg viewBox="0 0 48 48" role="presentation">
+                        <path d="M8 17.5 24 9l16 8.5v19H8z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+                        <path d="M8 18l16 9 16-9M24 27v9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+                        <path d="m19 17 5-2.7 5 2.7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <span class="hero-card-label">Една общност. Повече намерени вещи.</span>
+                <strong>Изгубено днес.<br />Намерено утре.</strong>
+                <span class="hero-card-footer"><span class="status-dot"></span> Обявите са на едно място</span>
+            </div>
+            <span class="hero-spark spark-one">✦</span>
+            <span class="hero-spark spark-two">✦</span>
+        </div>
+    </section>
+
+    <section class="home-how-it-works" aria-labelledby="how-title">
+        <div class="section-heading">
+            <span class="home-eyebrow">Лесно и подредено</span>
+            <h2 id="how-title">Как работи платформата</h2>
+            <p>Всичко необходимо, за да потърсиш вещ или да помогнеш тя да бъде върната.</p>
+        </div>
+
+        <div class="home-steps">
+            <article class="home-step-card">
+                <span class="step-number">01</span>
+                <h3>Публикувай</h3>
+                <p>Опиши вещта, добави категория, място и дата, за да може обявата да бъде открита.</p>
+            </article>
+            <article class="home-step-card">
+                <span class="step-number">02</span>
+                <h3>Потърси</h3>
+                <p>Прегледай обявите и използвай филтрите по вид, категория, място и период.</p>
+            </article>
+            <article class="home-step-card">
+                <span class="step-number">03</span>
+                <h3>Открий съвпадение</h3>
+                <p>Виж предложените сходни обяви за изгубени и намерени вещи от една категория.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="home-bottom-cta" aria-labelledby="cta-title">
+        <div>
+            <h2 id="cta-title">Търсиш вещ или искаш да помогнеш?</h2>
+            <p>Разгледай публикуваните обяви или сподели информация за намерена вещ.</p>
+        </div>
+        <a asp-controller="Items" asp-action="Index" class="btn home-button-light">Към обявите</a>
+    </section>
 </div>

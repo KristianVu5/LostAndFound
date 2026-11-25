@@ -1,4 +1,4 @@
-﻿@model LostAndFound.ViewModels.ItemForm
+@model LostAndFound.ViewModels.ItemForm
 
 <div class="mb-3">
     <label asp-for="Title" class="form-label">Заглавие</label>
@@ -41,4 +41,11 @@
         <option value="">Избери категория</option>
     </select>
     <span asp-validation-for="CategoryId" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="PhotoFiles" class="form-label">Снимки (JPG или PNG)</label>
+    <input asp-for="PhotoFiles" type="file" multiple accept=".jpg,.jpeg,.png,image/jpeg,image/png" class="form-control" />
+    <span asp-validation-for="PhotoFiles" class="text-danger"></span>
+    <div class="form-text">Можеш да избереш до 5 снимки във формат JPG или PNG, всяка до 5 MB.</div>
 </div>

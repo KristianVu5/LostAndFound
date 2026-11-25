@@ -4,10 +4,10 @@ namespace LostAndFound.ViewModels
 {
     public class ItemDetailsViewModel
     {
-        public Item Item { get; set; } = null!;
+        public Report Report { get; set; } = null!;
         public bool CanManage { get; set; }
 
-        public IReadOnlyList<Item> PotentialMatches { get; set; } = Array.Empty<Item>();
+        public IReadOnlyList<Report> PotentialMatches { get; set; } = Array.Empty<Report>();
         
     }
 }

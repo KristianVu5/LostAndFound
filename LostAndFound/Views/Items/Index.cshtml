@@ -1,8 +1,4 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
-@model IReadOnlyList<Item>
+@model IReadOnlyList<Report>
 
 @{
     ViewData["Title"] = "Обяви";
@@ -10,19 +6,19 @@
     var dateFrom = ViewData["DateFrom"] as string;
     var dateTo = ViewData["DateTo"] as string;
     var selectedType = ViewData["Type"] is ItemType value
-    ? value
-    : (ItemType?)null;
+        ? value
+        : (ItemType?)null;
     var currentPage = (int)(ViewData["CurrentPage"] ?? 1);
     var totalPages = (int)(ViewData["TotalPages"] ?? 0);
     var selectedCategoryId = ViewData["CategoryId"] is int categoryValue
-    ? categoryValue
-    : (int?)null;
+        ? categoryValue
+        : (int?)null;
     var selectedTypeValue = selectedType.HasValue
-    ? (int)selectedType.Value
-    : (int?)null;
+        ? (int)selectedType.Value
+        : (int?)null;
 }
 
-<h1>Обяви</h1>
+<h1>Обяви за изгубени и намерени вещи</h1>
 
 @if (TempData["ItemCreated"] is string message)
 {
@@ -40,9 +36,9 @@
 
 <form asp-action="Index" method="get" class="mb-3">
     <div class="mb-2">
-        <label for="type" class="form-label">Вид на обявата</label>
+        <label for="type" class="form-label">Тип на обявата</label>
         <select id="type" name="type" class="form-select">
-            <option value="">Всички</option>
+            <option value="">Всички типове</option>
             <option value="1" selected="@(selectedType == ItemType.Lost)">Изгубена</option>
             <option value="2" selected="@(selectedType == ItemType.Found)">Намерена</option>
         </select>
@@ -60,14 +56,12 @@
 
     <fieldset class="mb-3">
         <legend class="col-form-label pt-0">Период</legend>
-
         <div class="d-flex flex-wrap gap-3">
             <div class="d-flex align-items-center gap-2">
                 <label for="dateFrom" class="mb-0">От</label>
                 <input id="dateFrom" name="dateFrom" type="date"
                        value="@dateFrom" class="form-control w-auto" />
             </div>
-
             <div class="d-flex align-items-center gap-2">
                 <label for="dateTo" class="mb-0">До</label>
                 <input id="dateTo" name="dateTo" type="date"
@@ -75,13 +69,11 @@
             </div>
         </div>
     </fieldset>
-   
-    <label for="location" class="form-label">Място</label>
 
+    <label for="location" class="form-label">Място</label>
     <div class="input-group">
         <input id="location" name="location" value="@location"
-            class="form-control" placeholder="Например: Варна" />
-
+               class="form-control" placeholder="Например: Варна" />
         <button type="submit" class="btn btn-primary">Търси</button>
         <a asp-action="Index" class="btn btn-outline-secondary">Изчисти</a>
     </div>
@@ -89,10 +81,9 @@
 
 @if (ViewData.ModelState.IsValid && Model.Count == 0)
 {
-    <p>@(ViewData["HasFilters"] is true 
-        ? "Няма обяви по избраните филтри." 
-        : "Все още няма публикувани обяви.")
-    </p>
+    <p>@(ViewData["HasFilters"] is true
+        ? "Няма обяви, които отговарят на избраните критерии."
+        : "Все още няма публикувани обяви.")</p>
 }
 else if (Model.Count > 0)
 {
@@ -100,7 +91,7 @@ else if (Model.Count > 0)
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">Заглавие</th>
+                    <th scope="col">Вещ</th>
                     <th scope="col">Тип</th>
                     <th scope="col">Категория</th>
                     <th scope="col">Място</th>
@@ -108,26 +99,27 @@ else if (Model.Count > 0)
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @foreach (var report in Model)
                 {
                     <tr>
                         <td>
-                            <a asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
+                            <a asp-action="Details" asp-route-id="@report.Id">
+                                @report.Item.Title
+                            </a>
                         </td>
-                        <td>@(item.Type == ItemType.Lost ? "Изгубена" : "Намерена")</td>
-                        <td>@item.Category.Name</td>
-                        <td>@item.Location</td>
-                        <td>@item.OccurredOn.ToString("dd.MM.yyyy г.")</td>
+                        <td>@(report.Type == ItemType.Lost ? "Изгубена" : "Намерена")</td>
+                        <td>@report.Item.Category.Name</td>
+                        <td>@report.Location</td>
+                        <td>@report.OccurredOn.ToString("dd.MM.yyyy")</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-     
 
     @if (totalPages > 1)
     {
-        <nav aria-label="Страници">
+        <nav aria-label="Страници с обяви">
             <ul class="pagination">
                 @if (currentPage > 1)
                 {
@@ -146,9 +138,7 @@ else if (Model.Count > 0)
                 }
 
                 <li class="page-item disabled">
-                    <span class="page-link">
-                        Страница @currentPage от @totalPages
-                    </span>
+                    <span class="page-link">Страница @currentPage от @totalPages</span>
                 </li>
 
                 @if (currentPage < totalPages)

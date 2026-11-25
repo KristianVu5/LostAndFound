@@ -1,38 +1,53 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
 @model LostAndFound.ViewModels.ItemDetailsViewModel
+
 @{
-    ViewData["Title"] = Model.Item.Title;
-    var item = Model.Item;
+    var report = Model.Report;
+    var item = report.Item;
+    ViewData["Title"] = item.Title;
 }
 
 <h1>@item.Title</h1>
 
+@if (item.Photos.Count > 0)
+{
+    <div class="d-flex flex-wrap gap-3 my-3">
+        @foreach (var photo in item.Photos)
+        {
+            <img src="@photo.ImagePath"
+                 alt="Снимка на @item.Title"
+                 class="img-fluid rounded border"
+                 style="max-height: 420px; object-fit: contain;" />
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">За тази вещ няма качена снимка.</p>
+}
+
 <dl>
-    <dt>Тип</dt>
-    <dd>@(item.Type == ItemType.Lost ? "Изгубена" : "Намерена")</dd>
+    <dt>Тип на обявата</dt>
+    <dd>@(report.Type == ItemType.Lost ? "Изгубена" : "Намерена")</dd>
 
     <dt>Категория</dt>
     <dd>@item.Category.Name</dd>
 
     <dt>Място</dt>
-    <dd>@item.Location</dd>
+    <dd>@report.Location</dd>
 
     <dt>Дата</dt>
-    <dd>@item.OccurredOn.ToString("dd.MM.yyyy")</dd>
-
+    <dd>@report.OccurredOn.ToString("dd.MM.yyyy")</dd>
 </dl>
 
-<h2>Описание</h2>
+<h2>Описание на вещта</h2>
 <p>@item.Description</p>
 
 @if (Model.CanManage)
 {
-    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Редактирай</a>
-    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Изтрий</a>
+    <a asp-action="Edit" asp-route-id="@report.Id" class="btn btn-primary">Редактирай</a>
+    <a asp-action="Delete" asp-route-id="@report.Id" class="btn btn-outline-danger">Изтрий</a>
 }
+
 <a asp-action="Index" class="btn btn-link">Към обявите</a>
 
 <h2>Възможни съвпадения</h2>
@@ -47,12 +62,11 @@ else
         @foreach (var match in Model.PotentialMatches)
         {
             <li>
-                <a asp-action="Details" asp-route-id="@match.Id">@match.Title</a>
-                — @match.Category.Name,
+                <a asp-action="Details" asp-route-id="@match.Id">@match.Item.Title</a>
+                — @match.Item.Category.Name,
                 @match.Location,
                 @match.OccurredOn.ToString("dd.MM.yyyy")
             </li>
         }
     </ul>
 }
-

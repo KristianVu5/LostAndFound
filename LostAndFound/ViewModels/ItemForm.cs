@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using LostAndFound.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace LostAndFound.ViewModels
 {
@@ -25,6 +27,8 @@ namespace LostAndFound.ViewModels
 
         [Required(ErrorMessage = "Избери категория.")]
         public int? CategoryId { get; set; }
+
+        public List<IFormFile> PhotoFiles { get; set; } = new();
 
     }
 }

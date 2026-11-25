@@ -1,0 +1,38 @@
+@model LostAndFound.ViewModels.PromoteAdminViewModel
+
+@{
+    ViewData["Title"] = "Назначаване на администратор";
+}
+
+<h1>Назначаване на администратор</h1>
+
+<p>Въведи имейла на вече регистриран потребител.</p>
+
+@if (TempData["SuccessMessage"] is string message)
+{
+    <div class="alert alert-success">
+        @message
+    </div>
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-action="Promote" method="post">
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Направи администратор
+    </button>
+
+    <a asp-controller="Items" asp-action="Index" class="btn btn-link">
+        Към обявите
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

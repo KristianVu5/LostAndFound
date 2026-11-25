@@ -28,6 +28,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
@@ -64,6 +65,39 @@ using (var scope = app.Services.CreateScope())
 
             throw new InvalidOperationException(
                 $"Ролята '{roleName}' не може дда бъде създадена: {errors}");
+        }
+    }
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    var adminEmail = app.Configuration["AdminEmail"];
+
+    if (string.IsNullOrWhiteSpace(adminEmail))
+    {
+        throw new InvalidOperationException(
+            "AdminEmail не е зададен в appsettings.Development.json.");
+    }
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser is null)
+    {
+        throw new InvalidOperationException(
+            $"Не е намерен регистриран акаунт с имейл {adminEmail}.");
+    }
+
+    if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+    {
+        var result = await userManager.AddToRoleAsync(adminUser, "Admin");
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(
+                "; ",
+                result.Errors.Select(error => error.Description));
+
+            throw new InvalidOperationException(
+                $"Неуспешно назначаване на администраторската роля: {errors}");
         }
     }
 }

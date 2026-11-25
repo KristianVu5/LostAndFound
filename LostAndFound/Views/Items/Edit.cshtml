@@ -1,14 +1,14 @@
-﻿@model LostAndFound.ViewModels.ItemForm
+@model LostAndFound.ViewModels.ItemForm
 
 @{
     ViewData["Title"] = "Редактиране на обява";
-    var itemId = (int)ViewData["ItemId"]!;
+    var reportId = (int)ViewData["ReportId"]!;
 }
 
 <h1>Редактиране на обява</h1>
 
-<form asp-action="Edit" asp-route-id="@itemId" method="post">
+<form asp-action="Edit" asp-route-id="@reportId" method="post" enctype="multipart/form-data">
     <partial name="_ItemFormFields" model="Model" />
     <button type="submit" class="btn btn-primary">Запази</button>
-    <a asp-action="Details" asp-route-id="@itemId" class="btn btn-link">Към обявата</a>
+    <a asp-action="Details" asp-route-id="@reportId" class="btn btn-link">Към обявата</a>
 </form>
