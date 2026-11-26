@@ -1,0 +1,14 @@
+@model LostAndFound.ViewModels.CategoryDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h1>Детайли за категорията</h1>
+<dl>
+    <dt>Име на категорията</dt>
+    <dd>@Model.Name</dd>
+    <dt>Брой обяви</dt>
+    <dd>@Model.ReportCount</dd>
+</dl>
+<a asp-action="Index" class="btn btn-outline-secondary">Назад към категориите</a>

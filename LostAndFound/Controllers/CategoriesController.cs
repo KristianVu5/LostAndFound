@@ -30,6 +30,27 @@ namespace LostAndFound.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Details([FromRoute] int id)
+        {
+            var details = await _context.Categories
+                .AsNoTracking()
+                .Where(category => category.Id == id)
+                .Select(category => new CategoryDetailsViewModel
+                {
+                    Name = category.Name,
+                    ReportCount = _context.Reports.Count(report => report.Item.CategoryId == category.Id)
+                })
+                .FirstOrDefaultAsync();
+
+            if (details is null)
+            {
+                return NotFound();
+            }
+
+            return View(details);
+        }
+
+        [HttpGet]
         public IActionResult Create()
         {
             return View(new CategoryForm());

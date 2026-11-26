@@ -1,0 +1,82 @@
+@model IReadOnlyList<LostAndFound.ViewModels.AdminUserViewModel>
+
+@{
+    ViewData["Title"] = "Администратори";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">Администратори</h1>
+        <p class="text-muted mb-0">
+            Основният администратор може да променя ролите на останалите администратори.
+        </p>
+    </div>
+    <a asp-action="Promote" class="btn btn-primary">Добави администратор</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="status">@successMessage</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-warning" role="alert">@errorMessage</div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-light border" role="status">
+        Няма регистрирани администратори.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Имейл</th>
+                    <th scope="col">Роля</th>
+                    <th scope="col" class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var admin in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@admin.Email</td>
+                        <td>
+                            @if (admin.IsConfiguredAdmin)
+                            {
+                                <span class="badge text-bg-primary">Основен администратор</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Администратор</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (!admin.IsConfiguredAdmin)
+                            {
+                                <form asp-action="Demote" asp-route-id="@admin.Id" method="post"
+                                      class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Направи обикновен потребител
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Защитен акаунт</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="Items" asp-action="Index" class="btn btn-link px-0">Към обявите</a>
+

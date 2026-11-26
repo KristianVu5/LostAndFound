@@ -1,3 +1,5 @@
+@inject IConfiguration Configuration
+
 <!DOCTYPE html>
 <html lang="bg">
 <head>
@@ -41,8 +43,47 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">Категории</a>
                             </li>
+                        }
+                        @if (User.IsInRole("Admin")
+                            && string.Equals(
+                                User.Identity?.Name,
+                                Configuration["AdminEmail"],
+                                StringComparison.OrdinalIgnoreCase))
+                        {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Admins" asp-action="Promote">Администратори</a>
+                                <a class="nav-link" asp-area="" asp-controller="Admins" asp-action="Index">Администратори</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <button type="button" class="nav-link dropdown-toggle"
+                                        id="reportsMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Справки
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="reportsMenu">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reports"
+                                           asp-action="ByPeriod">Обяви по период</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reports"
+                                           asp-action="LostByCategory">Изгубени вещи по категория</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reports"
+                                           asp-action="FoundByLocation">Намерени вещи по място</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reports"
+                                           asp-action="CategoryPopularity">Категории с най-много обяви</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reports"
+                                           asp-action="PotentialMatches">Обяви с възможни съвпадения</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reports"
+                                           asp-action="Statistics">Изгубени срещу намерени вещи</a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         <li class="nav-item nav-auth-item">

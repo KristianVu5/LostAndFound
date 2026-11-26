@@ -65,15 +65,15 @@ public class LoginModel : PageModel
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Имейлът е задължителен.")]
+        [EmailAddress(ErrorMessage = "Въведете валиден имейл адрес.")]
         public string Email { get; set; } = default!;
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Паролата е задължителна.")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = default!;
 
@@ -129,7 +129,7 @@ public class LoginModel : PageModel
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, "Невалиден имейл адрес или парола.");
                 return Page();
             }
         }

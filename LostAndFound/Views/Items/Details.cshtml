@@ -8,6 +8,16 @@
 
 <h1>@item.Title</h1>
 
+@if (TempData["ClaimMessage"] is string claimMessage)
+{
+    <div class="alert alert-success" role="status">@claimMessage</div>
+}
+
+@if (TempData["ClaimError"] is string claimError)
+{
+    <div class="alert alert-warning" role="alert">@claimError</div>
+}
+
 @if (item.Photos.Count > 0)
 {
     <div class="d-flex flex-wrap gap-3 my-3">
@@ -22,7 +32,7 @@
 }
 else
 {
-    <p class="text-muted">За тази вещ няма качена снимка.</p>
+    <p class="text-muted">Към тази обява няма качени снимки.</p>
 }
 
 <dl>
@@ -50,7 +60,91 @@ else
 
 <a asp-action="Index" class="btn btn-link">Към обявите</a>
 
-<h2>Възможни съвпадения</h2>
+@if (report.Type == ItemType.Found)
+{
+    <section class="mt-4">
+        <h2>Заявка за собственост</h2>
+
+        @if (Model.CanSubmitClaim)
+        {
+            @if (Model.HasSubmittedClaim)
+            {
+                <p>Вече сте изпратили заявка за тази вещ. Собственикът на обявата ще я прегледа.</p>
+            }
+            else
+            {
+                <p>Смятате, че тази вещ е ваша? Изпратете кратко съобщение до човека, който я е намерил.</p>
+                <form asp-action="Claim" asp-route-id="@report.Id" method="post">
+                    <div class="mb-3">
+                        <label for="Message" class="form-label">Съобщение</label>
+                        <textarea id="Message" name="Message" rows="4" maxlength="1000"
+                                  class="form-control" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Изпрати заявка</button>
+                </form>
+            }
+        }
+        else if (User.Identity?.IsAuthenticated != true)
+        {
+            <p>
+                За да изпратите заявка, първо
+                <a asp-area="Identity" asp-page="/Account/Login"
+                   asp-route-returnUrl="@Url.Action("Details", "Items", new { id = report.Id })">влезте в профила си</a>.
+            </p>
+        }
+    </section>
+}
+
+@if (Model.CanManage)
+{
+    <section class="mt-4">
+        <h2>Заявки за тази обява</h2>
+
+        @if (Model.Claims.Count == 0)
+        {
+            <p>Все още няма подадени заявки.</p>
+        }
+        else
+        {
+            @foreach (var claim in Model.Claims)
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>Подател:</strong> @claim.Claimant.Email</p>
+                        <p><strong>Съобщение:</strong> @claim.Message</p>
+                        <p><strong>Изпратена на:</strong> @claim.SubmittedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+                        <p>
+                            <strong>Статус:</strong>
+                            @(claim.Status switch
+                            {
+                                ItemClaimStatus.Pending => "Чака преглед",
+                                ItemClaimStatus.Approved => "Одобрена",
+                                ItemClaimStatus.Rejected => "Отхвърлена",
+                                _ => "Неизвестен"
+                            })
+                        </p>
+
+                        @if (claim.Status == ItemClaimStatus.Pending)
+                        {
+                            <form asp-action="ReviewClaim" asp-route-id="@report.Id" method="post" class="d-inline">
+                                <input type="hidden" name="claimId" value="@claim.Id" />
+                                <button type="submit" name="status" value="@((int)ItemClaimStatus.Approved)"
+                                        class="btn btn-success">Одобри</button>
+                            </form>
+                            <form asp-action="ReviewClaim" asp-route-id="@report.Id" method="post" class="d-inline">
+                                <input type="hidden" name="claimId" value="@claim.Id" />
+                                <button type="submit" name="status" value="@((int)ItemClaimStatus.Rejected)"
+                                        class="btn btn-outline-danger">Отхвърли</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </section>
+}
+
+<h2 class="mt-4">Възможни съвпадения</h2>
 
 @if (Model.PotentialMatches.Count == 0)
 {

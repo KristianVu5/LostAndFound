@@ -158,11 +158,33 @@ namespace LostAndFound.Controllers
                 .Take(5)
                 .ToArray();
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var canManage = User.Identity?.IsAuthenticated == true && CanManageReport(report);
+            var hasSubmittedClaim = userId is not null
+                && await _context.ItemClaims.AnyAsync(claim =>
+                    claim.ReportId == report.Id && claim.ClaimantId == userId);
+
+            var claims = new List<ItemClaim>();
+            if (canManage)
+            {
+                claims = await _context.ItemClaims
+                    .AsNoTracking()
+                    .Where(claim => claim.ReportId == report.Id)
+                    .Include(claim => claim.Claimant)
+                    .OrderByDescending(claim => claim.SubmittedAt)
+                    .ToListAsync();
+            }
+
             return View(new ItemDetailsViewModel
             {
                 Report = report,
                 PotentialMatches = potentialMatches,
-                CanManage = User.Identity?.IsAuthenticated == true && CanManageReport(report)
+                CanManage = canManage,
+                CanSubmitClaim = report.Type == ItemType.Found
+                    && userId is not null
+                    && report.CreatedById != userId,
+                HasSubmittedClaim = hasSubmittedClaim,
+                Claims = claims
             });
         }
 
@@ -228,7 +250,7 @@ namespace LostAndFound.Controllers
                         });
                     }
 
-                    // Save the report, its item, and the item's photos as one EF Core object graph.
+                  
                     _context.Reports.Add(report);
                     await _context.SaveChangesAsync();
                     TempData["ItemCreated"] = "Обявата е създадена успешно.";
@@ -458,6 +480,106 @@ namespace LostAndFound.Controllers
             }
             TempData["ItemDeleted"] = "Обявата е изтрита.";
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Claim([FromRoute] int id, ItemClaimForm form)
+        {
+            var report = await _context.Reports
+                .FirstOrDefaultAsync(report => report.Id == id);
+
+            if (report is null)
+            {
+                return NotFound();
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null)
+            {
+                return Challenge();
+            }
+
+            if (report.Type != ItemType.Found || report.CreatedById == userId)
+            {
+                return Forbid();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ClaimError"] = "Моля, въведете съобщение до 1000 символа.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var alreadySubmitted = await _context.ItemClaims.AnyAsync(claim =>
+                claim.ReportId == id && claim.ClaimantId == userId);
+
+            if (alreadySubmitted)
+            {
+                TempData["ClaimError"] = "Вече сте изпратили заявка за тази обява.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            _context.ItemClaims.Add(new ItemClaim
+            {
+                ReportId = id,
+                ClaimantId = userId,
+                Message = form.Message.Trim(),
+                SubmittedAt = DateTime.UtcNow,
+                Status = ItemClaimStatus.Pending
+            });
+
+            await _context.SaveChangesAsync();
+
+            TempData["ClaimMessage"] = "Заявката е изпратена. Собственикът на обявата ще я прегледа.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReviewClaim(
+            [FromRoute] int id,
+            [FromForm] int claimId,
+            [FromForm] ItemClaimStatus status)
+        {
+            var claim = await _context.ItemClaims
+                .Include(itemClaim => itemClaim.Report)
+                .FirstOrDefaultAsync(itemClaim =>
+                    itemClaim.Id == claimId && itemClaim.ReportId == id);
+
+            if (claim is null)
+            {
+                return NotFound();
+            }
+
+            if (!CanManageReport(claim.Report))
+            {
+                return Forbid();
+            }
+
+            if (claim.Report.Type != ItemType.Found
+                || (status != ItemClaimStatus.Approved
+                    && status != ItemClaimStatus.Rejected))
+            {
+                return BadRequest();
+            }
+
+            if (claim.Status != ItemClaimStatus.Pending)
+            {
+                TempData["ClaimError"] = "Тази заявка вече е прегледана.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            claim.Status = status;
+            await _context.SaveChangesAsync();
+
+            TempData["ClaimMessage"] = status == ItemClaimStatus.Approved
+                ? "Заявката е одобрена."
+                : "Заявката е отхвърлена.";
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         private async Task<(string RelativePath, string PhysicalPath)> SavePhotoFileAsync(

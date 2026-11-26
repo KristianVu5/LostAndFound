@@ -1,0 +1,32 @@
+﻿@model LostAndFound.ViewModels.ReportStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Изгубени срещу намерени вещи";
+}
+
+<h1>Изгубени срещу намерени вещи</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Вид обява</th>
+            <th scope="col" class="text-end">Брой</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Изгубени</th>
+            <td class="text-end">@Model.LostCount</td>
+        </tr>
+        <tr>
+            <th scope="row">Намерени</th>
+            <td class="text-end">@Model.FoundCount</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th scope="row">Общо</th>
+            <td class="text-end fw-bold">@Model.TotalCount</td>
+        </tr>
+    </tfoot>
+</table>

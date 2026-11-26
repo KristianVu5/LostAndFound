@@ -1,0 +1,41 @@
+﻿@model IReadOnlyList<LostAndFound.ViewModels.PotentialMatchRow>
+
+@{
+    ViewData["Title"] = "Обяви с възможни съвпадения";
+}
+
+<h1>Обяви с възможни съвпадения</h1>
+
+@if (Model.Count == 0)
+{
+    <p>Няма изгубени обяви с възможни съвпадения.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Изгубена вещ</th>
+                    <th scope="col">Категория</th>
+                    <th scope="col">Дата на изгубване</th>
+                    <th scope="col" class="text-end">Възможни съвпадения</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-controller="Items" asp-action="Details"
+                               asp-route-id="@row.ReportId">@row.Title</a>
+                        </td>
+                        <td>@row.CategoryName</td>
+                        <td>@row.OccurredOn.ToString("dd.MM.yyyy")</td>
+                        <td class="text-end">@row.MatchCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
